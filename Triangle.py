@@ -1,5 +1,5 @@
+from manim import *
 import Point
-
 
 class Triangle:
     def __init__(self, p1: Point, p2: Point, p3: Point):
@@ -7,37 +7,67 @@ class Triangle:
         self.p2 = p2
         self.p3 = p3
 
-        norm_p1 = self.p1.copy()
-        norm_p2 = self.p2.copy()
-        norm_p3 = self.p3.copy()
+        # Creating transformation function to normalize triangle
+        # A, B, C are side lengths of triangle
+        # Find point to be mapped to origin and point to check reflection condition
         A = Point.distance(p2, p3)
         B = Point.distance(p1, p3)
         C = Point.distance(p1, p2)
         origin_point = p2
-        reflect = p1
+        reflect_point = p1
 
+        # Check reflection condition and which point to be mapped to origin
         if (A - B) * (C ** 2 - (A + B) ** 2) > 0:
             origin_point = p1
-            reflect = p2
+            reflect_point = p2
+
+        # Create rotation tuple: (sin(theta), cos(theta))
         rotate_by = ((p3.y - origin_point.y) / Point.distance(p3, origin_point),
                      (p3.x - origin_point.x) / Point.distance(p3, origin_point))
-        rotate = lambda x, y: (rotate_by[1] * x + rotate_by[0] * y, -rotate_by[0] * x + rotate_by[1] * y)
+        # Create rotation function
+        rotate_clockwise = lambda x, y: (rotate_by[1] * x + rotate_by[0] * y, -rotate_by[0] * x + rotate_by[1] * y)
+        rotate_counter_clockwise = lambda x, y: (rotate_by[1] * x - rotate_by[0] * y, rotate_by[0] * x + rotate_by[1] * y)
 
-        if rotate(reflect.x - origin_point.x, reflect.y - origin_point.y)[1] < 0:
+        # Set reflection constant
+        reflect = 1
+        if rotate_clockwise(reflect_point.x - origin_point.x, reflect_point.y - origin_point.y)[1] < 0:
             reflect = -1
-        else:
-            reflect = 1
-        scale = 1 / rotate(p3.x - origin_point.x, p3.y - origin_point.y)[0]
 
-        def transform(p: Point):
-            newx = p.x - origin_point.x
-            newy = p.y - origin_point.y
-            newx, newy = rotate(newx, newy)
-            newy *= scale
-            newy *= scale * reflect
+        # Set scaling constant
+        scale = rotate_clockwise(p3.x - origin_point.x, p3.y - origin_point.y)[0]
+
+        # Define transformation function and set it as an instance variable
+        # Order of transformation: translate, rotate, scale & reflect if needed
+        def norm(p: Point):
+            newx = p.x
+            newy = p.y
+            newx -= origin_point.x
+            newy -= origin_point.y
+            newx, newy = rotate_clockwise(newx, newy)
+            newx /= scale
+            newy /= scale * reflect
             return Point.Point(newx, newy)
 
-        self.transform = transform
+        self.norm = norm
+
+        def denorm(p: Point):
+            newx = p.x
+            newy = p.y
+            newx *= scale
+            newy *= scale * reflect
+            newx, newy = rotate_counter_clockwise(newx, newy)
+            newx += origin_point.x
+            newy += origin_point.y
+            return Point.Point(newx, newy)
+
+        self.denorm = denorm
+
+        self.a = self.norm(origin_point)
+        self.b = self.norm(self.p3)
+        self.c = self.norm(reflect_point)
 
     def centroid(self):
+        """
+        Centroid of triangle object.
+        """
         return Point.Point((self.p1.x + self.p2.x + self.p3.x) / 3, (self.p1.y + self.p2.y + self.p3.y) / 3)

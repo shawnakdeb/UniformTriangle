@@ -14,6 +14,9 @@ class Point:
     def copy(self):
         return Point(self.x, self.y)
 
+    def to_list(self):
+        return [self.x, self.y, 0]
+
 def distance(p1: Point, p2: Point):
     """
     Distance between two points.
