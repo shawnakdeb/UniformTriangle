@@ -1,4 +1,3 @@
-from manim import *
 import Point
 
 class Triangle:
@@ -71,3 +70,4 @@ class Triangle:
         Centroid of triangle object.
         """
         return Point.Point((self.p1.x + self.p2.x + self.p3.x) / 3, (self.p1.y + self.p2.y + self.p3.y) / 3)
+
