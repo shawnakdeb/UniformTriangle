@@ -23,7 +23,7 @@ def distance(p1: Point, p2: Point):
     :param p1: point 1
     :param p2: point 2
     """
-    return sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2)
+    return sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)
 
 def slope(p1: Point, p2: Point):
     """
